@@ -17,7 +17,7 @@ def train_loop(dataloader, model: PointNet, loss_fn, optimizer, device):
     model.train()
     for batch, data in enumerate(dataloader):
         # get data
-        xs, ys = data["coordinates"].to(device), nn.functional.one_hot(data["labels"], num_classes=40).to(device).type(torch.float32)
+        xs, ys = data["coordinates"].to(device), data["labels"].to(device)
 
         # calculate loss
         loss = loss_fn(model(xs), ys)
@@ -40,8 +40,11 @@ def test_loop(dataloader, model: PointNet, loss_fn, device):
     test_loss, correct = 0, 0
     with torch.no_grad():
         for data in dataloader:
-            xs, ys = data["coordinates"].to(device), nn.functional.one_hot(data["labels"], num_classes=40).to(device).type(torch.float32)
-            test_loss += loss_fn(model(xs).detach(), ys).item()
+            xs, ys = data["coordinates"].to(device), data["labels"].to(device)
+
+            pred = model(xs).detach()
+            test_loss += loss_fn(pred, ys).item()
+            correct += (pred.argmax(1) == ys).type(torch.float).sum().item()
 
     test_loss /= num_batches
     correct /= size
