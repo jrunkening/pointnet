@@ -1,6 +1,15 @@
 import torch
 import torch.nn as nn
 
+class Norm(nn.Module):
+    def __init__(self, n) -> None:
+        super().__init__()
+
+        self.bn = nn.BatchNorm1d(n)
+
+    def forward(self, xs):
+        return self.bn(xs.permute(0, 2, 1)).permute(0, 2, 1)
+
 
 class TNet(nn.Module):
     def __init__(self, activate, in_dim, out_dim) -> None:
@@ -11,36 +20,50 @@ class TNet(nn.Module):
 
         self.up = nn.Sequential(
             nn.Linear(in_dim, 64),
-            self.activate,
-            nn.Linear(64, 64),
-            self.activate,
-            nn.Linear(64, 64),
+            Norm(64),
             self.activate,
             # nn.Linear(64, 64),
+            # Norm(64),
+            # self.activate,
+            # nn.Linear(64, 64),
+            # Norm(64),
+            # self.activate,
+            # nn.Linear(64, 64),
+            # Norm(64),
             # self.activate,
 
             nn.Linear(64, 128),
-            self.activate,
-            nn.Linear(128, 128),
-            self.activate,
-            nn.Linear(128, 128),
+            Norm(128),
             self.activate,
             # nn.Linear(128, 128),
+            # Norm(128),
+            # self.activate,
+            # nn.Linear(128, 128),
+            # Norm(128),
+            # self.activate,
+            # nn.Linear(128, 128),
+            # Norm(128),
             # self.activate,
 
             nn.Linear(128, 1024),
-            self.activate,
-            nn.Linear(1024, 1024),
-            self.activate,
-            nn.Linear(1024, 1024),
+            Norm(1024),
             self.activate,
             # nn.Linear(1024, 1024),
+            # Norm(1024),
+            # self.activate,
+            # nn.Linear(1024, 1024),
+            # Norm(1024),
+            # self.activate,
+            # nn.Linear(1024, 1024),
+            # Norm(1024),
             # self.activate,
         )
         self.down = nn.Sequential(
             nn.Linear(1024, 512),
+            Norm(512),
             self.activate,
             nn.Linear(512, 256),
+            Norm(256),
             self.activate,
         )
 
@@ -64,25 +87,33 @@ class PointNet(nn.Module):
         self.input_transform = TNet(self.activate, 3, 3)
         self.mlp0 = nn.Sequential(
             nn.Linear(3, 64),
+            Norm(64),
             self.activate,
             nn.Linear(64, 64),
+            Norm(64),
             self.activate,
         )
         self.feature_transform = TNet(self.activate, 64, 64)
         self.mlp1 = nn.Sequential(
             nn.Linear(64, 64),
+            Norm(64),
             self.activate,
             nn.Linear(64, 128),
+            Norm(128),
             self.activate,
             nn.Linear(128, 1024),
+            Norm(1024),
             self.activate,
         )
         self.mlp2 = nn.Sequential(
             nn.Linear(1024, 512),
+            Norm(512),
             self.activate,
             nn.Linear(512, 256),
+            Norm(256),
             self.activate,
             nn.Linear(256, num_classes),
+            Norm(num_classes),
             self.activate,
         )
 
