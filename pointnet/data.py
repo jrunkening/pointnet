@@ -82,3 +82,17 @@ class ModelNet40H5(Dataset):
 
     def __repr__(self):
         return f"ModelNet40H5(phase={self.phase}, length={len(self)}, transform={self.transform})"
+
+
+def stack_collate_fn(list_data):
+    coordinates_batch, features_batch, labels_batch = (
+        torch.stack([d["coordinates"] for d in list_data]),
+        torch.stack([d["features"] for d in list_data]),
+        torch.cat([d["label"] for d in list_data]),
+    )
+
+    return {
+        "coordinates": coordinates_batch,
+        "features": features_batch,
+        "labels": labels_batch,
+    }
