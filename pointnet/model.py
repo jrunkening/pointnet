@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 
@@ -10,20 +11,31 @@ class TNet(nn.Module):
 
         self.up = nn.Sequential(
             nn.Linear(in_dim, 64),
-            # nn.Linear(64, 64),
-            # nn.Linear(64, 64),
-            # nn.Linear(64, 64),
             self.activate,
+            nn.Linear(64, 64),
+            self.activate,
+            nn.Linear(64, 64),
+            self.activate,
+            # nn.Linear(64, 64),
+            # self.activate,
+
             nn.Linear(64, 128),
-            # nn.Linear(128, 128),
-            # nn.Linear(128, 128),
-            # nn.Linear(128, 128),
             self.activate,
+            nn.Linear(128, 128),
+            self.activate,
+            nn.Linear(128, 128),
+            self.activate,
+            # nn.Linear(128, 128),
+            # self.activate,
+
             nn.Linear(128, 1024),
-            # nn.Linear(1024, 1024),
-            # nn.Linear(1024, 1024),
-            # nn.Linear(1024, 1024),
             self.activate,
+            nn.Linear(1024, 1024),
+            self.activate,
+            nn.Linear(1024, 1024),
+            self.activate,
+            # nn.Linear(1024, 1024),
+            # self.activate,
         )
         self.down = nn.Sequential(
             nn.Linear(1024, 512),
@@ -36,7 +48,7 @@ class TNet(nn.Module):
 
     def forward(self, xs):
         h = self.up(xs)
-        h = nn.MaxPool1d(h.size(1))(h.permute(0, 2, 1)).permute(0, 2, 1)
+        h = torch.max(h, dim=1, keepdim=True)[0]
         h = self.down(h)
         h = self.matmul(h)
 
@@ -67,17 +79,19 @@ class PointNet(nn.Module):
         )
         self.mlp2 = nn.Sequential(
             nn.Linear(1024, 512),
+            self.activate,
             nn.Linear(512, 256),
-            nn.Linear(256, num_classes)
+            self.activate,
+            nn.Linear(256, num_classes),
+            self.activate,
         )
-        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, xs):
         h = xs.bmm(self.input_transform(xs))
         h = self.mlp0(h)
         h = h.bmm(self.feature_transform(h))
         h = self.mlp1(h)
-        h = nn.MaxPool1d(h.size(1))(h.permute(0, 2, 1)).permute(0, 2, 1)
+        h = torch.max(h, dim=1, keepdim=True)[0]
         h = self.mlp2(h)
 
-        return self.softmax(h.squeeze())
+        return h.squeeze()

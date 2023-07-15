@@ -1,8 +1,11 @@
 {
     "cSpell.words": [
         "astype",
+        "dtype",
+        "keepdim",
         "matplotlib",
         "modelnet",
+        "optim",
         "pointnet",
         "pyplot",
         "Softmax"
